@@ -11,7 +11,7 @@ Para instalar los paquetes necesarios:
 
 
 O ejecutar el 
-## `Crear&ejecutar_entorno.bat`
+# `Crear&ejecutar_entorno.bat`
 <hr/>
 
 
