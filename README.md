@@ -10,8 +10,7 @@ Para instalar los paquetes necesarios:
 ### `pip install -r Ent_Api_requirements.txt`
 
 
-O ejecutar el 
-# `Crear&ejecutar_entorno.bat`
+O ejecutar el  # `Crear&ejecutar_entorno.bat`
 <hr/>
 
 
