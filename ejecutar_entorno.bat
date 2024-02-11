@@ -1,0 +1,1 @@
+Ent_Api\Scripts\activate

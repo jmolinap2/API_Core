@@ -1,3 +1,4 @@
 /venv/
+/Ent_Api/
 __pycache__/
 *.py[cod]
