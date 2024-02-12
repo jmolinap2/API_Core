@@ -1,37 +1,41 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import Group, Permission
 
-# Create your models here.
-
-
-class Persona(models.Model):
-    fullname = models.CharField(max_length=100)
-    nickname = models.CharField(max_length=50)
-    age = models.PositiveSmallIntegerField()
-    is_active = models.BooleanField(default=True)
-    is_verified = models.BooleanField(default=False)
-
-    # Agregar campos opcionales para vendedor
-
-    correo = models.EmailField(blank=True, null=True)
-    numero_celular = models.CharField(max_length=15, blank=True, null=True)
+# Extiende el modelo de usuario de Django para agregar campos adicionales
+class User(AbstractUser): 
+    image = models.ImageField(upload_to='profile_images/', null=True, blank=True, verbose_name='Imagen')
+    token = models.UUIDField(primary_key=False, editable=False, null=True, blank=True)
+    age = models.PositiveIntegerField(null=True, blank=True)
     descripcion = models.TextField(blank=True, null=True)
+    numero_celular = models.CharField(max_length=15, blank=True, null=True)
+    #groups = models.ManyToManyField(Group, related_name='custom_user_groups')
+    #user_permissions = models.ManyToManyField(Permission, related_name='custom_user_permissions')
+    
+
     def __str__(self):
-        return f"{self.fullname} (ID: {self.id})"
+        return self.username
+
+# Modelo para las imágenes de perfil de usuario
+
+
+# Modelo para las imágenes asociadas a un profesional
+class ProfessionalImage(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='professional_images')
+    image = models.ImageField(upload_to='professional_images/')
+
+    def __str__(self):
+        return f"Imagen de {self.user.username}"
     
     
 class Profesional(models.Model):
-    persona = models.OneToOneField(Persona, related_name='profesional', on_delete=models.CASCADE)
+    user = models.OneToOneField(User, related_name='profesional_data', on_delete=models.CASCADE)
     biografia = models.TextField(blank=True)
-    imagen_perfil = models.ImageField(upload_to='imagenes/', blank=True, null=True)
 
     def __str__(self):
-        return self.persona.fullname
+        return self.user.username
 
 
-class Imagen(models.Model):
-    persona = models.ForeignKey(Persona, related_name='imagenes', on_delete=models.CASCADE)
-    imagen = models.ImageField(upload_to='imagenes/')
     
 #Servicio y ServicioProfesional
 class Servicio(models.Model):

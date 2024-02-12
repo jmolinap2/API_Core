@@ -3,7 +3,7 @@
 
 <hr/>
 
-Primero, crear un entorno virtual: `python -m virtualenv Ent_Api`
+Primero, crear un entorno virtual: `python -m venv Ent_Api`
 
 Para instalar los paquetes necesarios: `pip install -r Ent_Api_requirements.txt`
 
