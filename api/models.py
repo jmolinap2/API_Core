@@ -1,6 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import AbstractUser, Group, Permission
 
 # Extiende el modelo de usuario de Django para agregar campos adicionales
 class User(AbstractUser): 
@@ -9,8 +8,6 @@ class User(AbstractUser):
     age = models.PositiveIntegerField(null=True, blank=True)
     descripcion = models.TextField(blank=True, null=True)
     numero_celular = models.CharField(max_length=15, blank=True, null=True)
-    #groups = models.ManyToManyField(Group, related_name='custom_user_groups')
-    #user_permissions = models.ManyToManyField(Permission, related_name='custom_user_permissions')
     
 
     def __str__(self):
@@ -54,13 +51,6 @@ class ProfesionalServicio(models.Model):
 
 #Pais/Provicia/ciudad
     
-class Ciudad(models.Model):
-    nombre = models.CharField(max_length=100)
-    provincia = models.CharField(max_length=100)
-    
-    def __str__(self):
-        return self.nombre
-
     
 class Pais(models.Model):
     nombre = models.CharField(max_length=100)
@@ -72,5 +62,12 @@ class Provincia(models.Model):
     nombre = models.CharField(max_length=100)
     pais = models.ForeignKey(Pais, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.nombre
+    
+class Ciudad(models.Model):
+    nombre = models.CharField(max_length=100)
+    provincia = models.ForeignKey(Provincia, on_delete=models.CASCADE)
+    
     def __str__(self):
         return self.nombre

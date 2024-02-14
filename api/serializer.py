@@ -1,14 +1,20 @@
 from rest_framework import serializers
 
 from drf import settings
-from .models import User, Profesional, Servicio
-
-
+from .models import User, Servicio,Profesional,Ciudad,Provincia,Pais ,ProfesionalServicio
         
 class ServicioSerializer(serializers.ModelSerializer):
     class Meta:
         model = Servicio
         fields = '__all__'
+
+class ProfesionalServicioSerializer(serializers.ModelSerializer):
+    profesional_nombre = serializers.CharField(source='profesional.nombre', read_only=True)
+    servicio_nombre = serializers.CharField(source='servicio.nombre', read_only=True)
+    
+    class Meta:
+        model = ProfesionalServicio
+        fields = ['id', 'profesional', 'servicio', 'profesional_nombre', 'servicio_nombre']
 
 class UserSerializer(serializers.ModelSerializer):
     #image = serializers.ImageField(source='image', read_only=True)
@@ -42,3 +48,22 @@ class UserProfesionalSerializer(serializers.ModelSerializer):
         user = User.objects.create(**validated_data)
         Profesional.objects.create(user=user, **user_data)
         return user
+
+
+#ubicacion
+class CiudadSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ciudad
+        fields = ['id', 'nombre', 'provincia']
+
+
+class PaisSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Pais
+        fields = ['id', 'nombre']
+
+
+class ProvinciaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Provincia
+        fields = ['id', 'nombre', 'pais']

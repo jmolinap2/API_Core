@@ -1,17 +1,23 @@
 from rest_framework import viewsets
-from .models import User , Profesional # Importa el modelo de Imagen
-from .serializer import UserSerializer, ProfesionalSerializer ,UserProfesionalSerializer # Importa el serializador de Imagen
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from .models import User, Profesional
+from .serializer import UserSerializer,ServicioSerializer,ProfesionalServicioSerializer,ProfesionalSerializer,UserProfesionalSerializer,CiudadSerializer,ProvinciaSerializer,PaisSerializer
+
+
+from .models import User, Servicio,Profesional,Ciudad,Provincia,Pais
 
 # Create your views here.
 
 
-class UserViewSet(viewsets.ModelViewSet):  # Cambia el nombre de la vista
-    queryset = User.objects.all()  # Cambia el nombre del modelo
-    serializer_class = UserSerializer  # Cambia el nombre del serializador
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+class ServicioViewSet(viewsets.ModelViewSet):  
+    queryset = Servicio.objects.all()
+    serializer_class = ServicioSerializer
+
+class ProfesionalServicioViewSet(viewsets.ModelViewSet):
+    queryset = Servicio.objects.all()
+    serializer_class = ProfesionalServicioSerializer 
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
     queryset = Profesional.objects.all()
@@ -20,3 +26,15 @@ class ProfesionalViewSet(viewsets.ModelViewSet):
 class UserProfesionalViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfesionalSerializer
+    
+class CiudadViewSet(viewsets.ModelViewSet):
+    queryset = Ciudad.objects.all()
+    serializer_class = CiudadSerializer
+
+class PaisViewSet(viewsets.ModelViewSet):
+    queryset = Pais.objects.all()
+    serializer_class = PaisSerializer
+
+class ProvinciaViewSet(viewsets.ModelViewSet):
+    queryset = Provincia.objects.all()
+    serializer_class = ProvinciaSerializer
