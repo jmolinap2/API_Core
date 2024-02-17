@@ -1,5 +1,5 @@
+from collections import defaultdict
 from rest_framework import serializers
-
 from drf import settings
 from .models import ProfessionalImage, User, Servicio,Profesional,Ciudad,Provincia,Pais ,ProfesionalServicio
 
@@ -11,83 +11,85 @@ class ServicioSerializer(serializers.ModelSerializer):
 
 class ProfesionalServicioRelacionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Servicio
+        model = ProfesionalServicio
         fields = '__all__'
 
-#Registro de usuarios
-class UserSerializer(serializers.ModelSerializer):
-    #image = serializers.ImageField(source='image', read_only=True)
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'age', 'descripcion', 'numero_celular', 'image']
 
 #relacionar servicios con profesionales
 class ProfesionalServicioSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    professional_images = serializers.SerializerMethodField()
+    servicios = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
     profesional_nombre = serializers.CharField(source='profesional.user.username', read_only=True)
-    servicios = serializers.SerializerMethodField()
-
+    id = serializers.IntegerField(source='profesional.id', read_only=True)
+    user_id = serializers.IntegerField(source='profesional.user.id', read_only=True)
+    bibliografia = serializers.CharField(source='profesional.bibliografia', read_only=True)
     class Meta:
-        model = ProfesionalServicio
-        fields = ['profesional', 'profesional_nombre', 'servicios']
-
+        model = Profesional
+        fields = ['id','user_id', 'profesional_nombre', 'image', 'professional_images', 'bibliografia', 'servicios']
+        
     def get_servicios(self, obj):
-        servicios_data = obj.profesional.servicios.all()
+        # Obtiene todos los servicios asociados a un profesional específico
+        servicios_data = ProfesionalServicio.objects.filter(profesional=obj.profesional).distinct('servicio')
         servicios = []
         for servicio in servicios_data:
             servicios.append({
-                'servicio': servicio.id,
-                'servicio_nombre': servicio.nombre
+                'servicio': servicio.servicio.id,
+                'servicio_nombre': servicio.servicio.nombre
             })
         return servicios
+    def get_image(self, obj):
+        # Aquí debes retornar la URL de la imagen del perfil del profesional asociado al servicio
+        if obj.profesional.user.image:
+            return obj.profesional.user.image.url
+        return None
 
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        return {
-            'profesional': ret['profesional'],
-            'profesional_nombre': ret['profesional_nombre'],
-            'servicios': ret['servicios']
-        }
+    def get_professional_images(self, obj):
+        # Aquí debes retornar una lista de URLs de las imágenes profesionales asociadas al usuario
+        professional_images = []
+        for image in obj.profesional.user.professional_images.all():
+            professional_images.append(image.image.url)
+        return professional_images
 
 # Usuario profesional, registro
 class ProfessionalImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfessionalImage
-        fields = ['image']
+        fields ='__all__'
         
-class ProfesionalSerializer(serializers.ModelSerializer):
-    user_image_url = serializers.SerializerMethodField()
-    servicios = serializers.PrimaryKeyRelatedField(many=True, queryset=Servicio.objects.all())
-
-    class Meta:
-        model = Profesional
-        fields = ['id', 'user', 'biografia', 'user_image_url', 'servicios']
-
-    def get_user_image_url(self, obj):
-        if obj.user.image:
-            return self.context['request'].build_absolute_uri(obj.user.image.url)
-        else:
-            # Construye la URL para la imagen empty.png
-            relative_url = 'static/img/empty.png'
-            return self.context['request'].build_absolute_uri(relative_url)
-        
-class UserProfesionalSerializer(serializers.ModelSerializer):
+#Registro de usuarios
+class UserSerializer(serializers.ModelSerializer):
     professional_images = ProfessionalImageSerializer(many=True, read_only=True)
-    servicios = ServicioSerializer(many=True, read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'age',
-                  'descripcion', 'numero_celular', 'image', 'professional_images',
-                  'profesional_data', 'servicios']
+        fields = ['id', 'username', 'first_name', 'last_name', 'age', 'descripcion', 'numero_celular', 'image', 'professional_images']
+         
+class ProfesionalSerializer(serializers.ModelSerializer):
+    user = UserSerializer()  # Anidamos el UserSerializer aquí
+    professional_images = ProfessionalImageSerializer(many=True, read_only=True)  # Agregamos las imágenes profesionales
 
-    profesional_data = serializers.SerializerMethodField()
+    class Meta:
+        model = Profesional
+        fields = ['id', 'user', 'biografia', 'professional_images']
+    def get_professional_images(self, obj):
+        professional_images = obj.user.professional_images.all()
+        return ProfessionalImageSerializer(professional_images, many=True).data
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user = User.objects.create(**user_data)
+        professional = Profesional.objects.create(user=user, **validated_data)
+        return professional
+    
 
-    def get_profesional_data(self, obj):
-        try:
-            profesional = Profesional.objects.get(user=obj)
-            return {'biografia': profesional.biografia}
-        except Profesional.DoesNotExist:
-            return None
+ 
+        
+class UserProfesionalSerializer(serializers.ModelSerializer):
+    user = UserSerializer()  # Anidar el UserSerializer aquí
+
+    class Meta:
+        model = Profesional
+        fields = '__all__'
 
 #ubicacion
 class CiudadSerializer(serializers.ModelSerializer):

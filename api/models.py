@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group, Permission
+from django.contrib.auth.models import User, AbstractUser, Group, Permission
+
 
 # Extiende el modelo de usuario de Django para agregar campos adicionales
 class User(AbstractUser): 
@@ -12,6 +13,8 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+    def get_professional_images(self):
+        return ProfessionalImage.objects.filter(user=self)
 
 # Modelo para las imágenes de perfil de usuario
 
@@ -31,8 +34,6 @@ class Profesional(models.Model):
 
     def __str__(self):
         return self.user.username
-
-
     
 #Servicio y ServicioProfesional
 class Servicio(models.Model):

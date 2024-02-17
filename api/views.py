@@ -1,11 +1,11 @@
 from rest_framework import viewsets
-from .serializer import ProfesionalServicioRelacionSerializer, UserSerializer,ServicioSerializer,ProfesionalServicioSerializer,ProfesionalSerializer,UserProfesionalSerializer,CiudadSerializer,ProvinciaSerializer,PaisSerializer
+from .serializer import ProfesionalServicioRelacionSerializer, ProfessionalImageSerializer, UserSerializer,ServicioSerializer,ProfesionalServicioSerializer,ProfesionalSerializer,UserProfesionalSerializer,CiudadSerializer,ProvinciaSerializer,PaisSerializer
 
 from rest_framework import viewsets
 from rest_framework.response import Response
 from rest_framework import status
 
-from .models import ProfesionalServicio, User, Servicio,Profesional,Ciudad,Provincia,Pais
+from .models import ProfesionalServicio, ProfessionalImage, User, Servicio,Profesional,Ciudad,Provincia,Pais
 
 # Create your views here.
 
@@ -23,12 +23,16 @@ class ProfesionalServicioRelacionViewSet(viewsets.ModelViewSet):
     serializer_class = ProfesionalServicioRelacionSerializer
 
 class ProfesionalServicioViewSet(viewsets.ModelViewSet):
-    queryset = ProfesionalServicio.objects.select_related('profesional__user', 'servicio').all()
+    queryset = ProfesionalServicio.objects.all()
     serializer_class = ProfesionalServicioSerializer
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
     queryset = Profesional.objects.all()
     serializer_class = ProfesionalSerializer
+
+class ProfessionalImageViewSet(viewsets.ModelViewSet):
+    queryset = ProfessionalImage.objects.all()
+    serializer_class = ProfessionalImageSerializer
     
 class UserProfesionalViewSet(viewsets.ModelViewSet):
     queryset = User.objects.filter(profesional_data__isnull=False)  # Filtra solo los usuarios que tienen datos de profesional
