@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework import routers
 from api import views
-from .views import viewsets_list
+from .views import LoginView, viewsets_list
 
 router = routers.DefaultRouter()
 
@@ -29,6 +29,7 @@ router.register(r'provincias', views.ProvinciaViewSet)
 router.register(r'ciudades', views.CiudadViewSet) """
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    #path('login/', LoginView.as_view(), name='login'),
 ]
 

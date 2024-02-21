@@ -1,5 +1,6 @@
 from collections import defaultdict
 from rest_framework import serializers
+from django.contrib.auth import authenticate, login
 from drf import settings
 from .models import ProfessionalImage, User, Servicio,Profesional,Ciudad,Provincia,Pais ,ProfesionalServicio
 
@@ -17,39 +18,32 @@ class ProfesionalServicioRelacionSerializer(serializers.ModelSerializer):
 
 #relacionar servicios con profesionales
 class ProfesionalServicioSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-    professional_images = serializers.SerializerMethodField()
-    servicios = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
-    profesional_nombre = serializers.CharField(source='profesional.user.username', read_only=True)
-    id = serializers.IntegerField(source='profesional.id', read_only=True)
-    user_id = serializers.IntegerField(source='profesional.user.id', read_only=True)
-    bibliografia = serializers.CharField(source='profesional.bibliografia', read_only=True)
     class Meta:
-        model = Profesional
-        fields = ['id','user_id', 'profesional_nombre', 'image', 'professional_images', 'bibliografia', 'servicios']
-        
-    def get_servicios(self, obj):
-        # Obtiene todos los servicios asociados a un profesional específico
-        servicios_data = ProfesionalServicio.objects.filter(profesional=obj.profesional).distinct('servicio')
-        servicios = []
-        for servicio in servicios_data:
-            servicios.append({
-                'servicio': servicio.servicio.id,
-                'servicio_nombre': servicio.servicio.nombre
-            })
-        return servicios
-    def get_image(self, obj):
-        # Aquí debes retornar la URL de la imagen del perfil del profesional asociado al servicio
-        if obj.profesional.user.image:
-            return obj.profesional.user.image.url
-        return None
+        model = ProfesionalServicio
+        fields = '__all__'
+#Login
+from rest_framework import serializers
 
-    def get_professional_images(self, obj):
-        # Aquí debes retornar una lista de URLs de las imágenes profesionales asociadas al usuario
-        professional_images = []
-        for image in obj.profesional.user.professional_images.all():
-            professional_images.append(image.image.url)
-        return professional_images
+class LoginSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=150)
+    password = serializers.CharField(max_length=128, write_only=True)
+
+    def validate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+
+        if username and password:
+            user = authenticate(username=username, password=password)
+
+            if user:
+                if not user.is_active:
+                    raise serializers.ValidationError("Este usuario está desactivado.")
+
+                return user
+            else:
+                raise serializers.ValidationError("Credenciales inválidas.")
+        else:
+            raise serializers.ValidationError("Se requiere un nombre de usuario y contraseña.")
 
 # Usuario profesional, registro
 class ProfessionalImageSerializer(serializers.ModelSerializer):
@@ -60,10 +54,19 @@ class ProfessionalImageSerializer(serializers.ModelSerializer):
 #Registro de usuarios
 class UserSerializer(serializers.ModelSerializer):
     professional_images = ProfessionalImageSerializer(many=True, read_only=True)
-
+    password = serializers.CharField(write_only=True)  # Campo de contraseña solo para escritura
     class Meta:
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'age', 'descripcion', 'numero_celular', 'image', 'professional_images']
+        fields = '__all__'
+    def create(self, validated_data):
+        # Extraer la contraseña del validated_data
+        password = validated_data.pop('password', None)
+        # Crear el usuario con la contraseña
+        user = User(**validated_data)
+        if password is not None:
+            user.set_password(password)  # Establecer la contraseña encriptada
+        user.save()
+        return user
          
 class ProfesionalSerializer(serializers.ModelSerializer):
     user = UserSerializer()  # Anidamos el UserSerializer aquí

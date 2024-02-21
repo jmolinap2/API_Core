@@ -30,19 +30,35 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
-INSTALLED_APPS = [
+# Aplicaciones de Django contribuidas por Django
+DJANGO_CONTRIB_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'coreapi',
-    'api'
 ]
 
+# Aplicaciones de terceros
+THIRD_PARTY_APPS = [
+    'rest_framework',
+    'rest_framework.authtoken',
+    'coreapi',
+    'corsheaders',  # CORS para permitir solicitudes desde otros dominios
+]
+
+# Tus propias aplicaciones personalizadas
+MIS_APPS = [
+    'api',
+]
+
+INSTALLED_APPS = DJANGO_CONTRIB_APPS + THIRD_PARTY_APPS + MIS_APPS
+CORS_ORIGIN_ALLOW_ALL = True
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -50,6 +66,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'drf.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'drf.urls'
@@ -72,6 +89,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'drf.wsgi.application'
 AUTH_USER_MODEL = 'api.User'
+
+
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -129,22 +148,27 @@ STATIC_URL = '/static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REST_FRAMEWORK = {
-    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
-}
+
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
-
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+}
 
 # Configuración específica para desarrollo
 if DEBUG:
-    # Configuración específica para desarrollo
-    ...
+    REST_FRAMEWORK.update({
+        # Agrega configuraciones específicas para desarrollo aquí si es necesario
+    })
 
 # Configuración específica para producción, incluida la autenticación JWT
 else:
-    REST_FRAMEWORK = {
+    REST_FRAMEWORK.update({
         'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
+            'rest_framework.authentication.TokenAuthentication',
         ],
-    }
+        'DEFAULT_PERMISSION_CLASSES': [
+            'rest_framework.permissions.IsAuthenticated',
+        ],
+    })
+# Configuración del registro
