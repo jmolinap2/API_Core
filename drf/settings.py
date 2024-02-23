@@ -98,7 +98,7 @@ AUTH_USER_MODEL = 'api.User'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'CarinosasAPI_db',
+        'NAME': 'CariñosasAPI_db',
         'USER': 'postgres',
         'PASSWORD': '12345',
         'HOST': 'localhost',
