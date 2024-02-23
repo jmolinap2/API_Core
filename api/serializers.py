@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate, login
 from drf import settings
 from django.contrib.auth import get_user_model
 from .models import ProfessionalImage, User, Servicio,Profesional,Ciudad,Provincia,Pais ,ProfesionalServicio
-
+from rest_framework.exceptions import ValidationError
 #Registro de servicios
 class ServicioSerializer(serializers.ModelSerializer):
     class Meta:
@@ -103,14 +103,36 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         return ProfessionalImageSerializer(professional_images, many=True).data
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        password = user_data.pop('password', None)  # Extraer la contraseña del usuario
-        user = User.objects.create_user(**user_data, password=password)
+        password = user_data.get('password', None)
+        age = user_data.pop('age', None)
+        descripcion = user_data.pop('descripcion', None)
+        email = user_data.pop('email', None)
+        first_name = user_data.pop('first_name', None)
+        last_name = user_data.pop('last_name', None)
+        numero_celular = user_data.pop('numero_celular', None)
+        username = user_data.pop('username', None)
+        user = User(username=username, descripcion=descripcion,
+                    email=email, first_name=first_name,
+                    last_name=last_name, age=age,
+                    numero_celular=numero_celular)  # no debo poner lo demas datos de user?
+        user.save()  # no, eso es por default
+        user.set_password(password)
+        user.save()  # como se hace para entrar en este modo? eso de debuguear f8, como pongo siguiente paso?
+
+        # Obtener datos de grupos y manejar posibles errores
+        groups_data = validated_data.pop('groups', None)
+        if groups_data:
+            try:
+                # Usa groups.set() para asignar grupos correctamente
+                user.groups.set(groups_data)
+            except exceptions.ObjectDoesNotExist:
+                # Maneja cualquier excepción potencial aquí, p.ej., registra o devuelve una respuesta de error
+                ...
+
+        #user = User.objects.create_user(**user, password=password)
         professional = Profesional.objects.create(user=user, **validated_data)
         return professional
-    
 
- 
-        
 class UserProfesionalSerializer(serializers.ModelSerializer):
     user = UserSerializer()  # Anidar el UserSerializer aquí
 
