@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-m$1xiohbetxtnfa9%zaaxgp!uh7_r*xu(1e!s3h$)&c7_q--47
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1',]
 
 
 # Application definition
@@ -158,7 +158,13 @@ REST_FRAMEWORK = {
 # Configuración específica para desarrollo
 if DEBUG:
     REST_FRAMEWORK.update({
-        # Agrega configuraciones específicas para desarrollo aquí si es necesario
+        #borrar en debug
+        'DEFAULT_AUTHENTICATION_CLASSES': [
+            'rest_framework.authentication.TokenAuthentication',
+        ],
+        'DEFAULT_PERMISSION_CLASSES': [
+            'rest_framework.permissions.IsAuthenticated',
+        ],
     })
 
 # Configuración específica para producción, incluida la autenticación JWT
@@ -172,3 +178,24 @@ else:
         ],
     })
 # Configuración del registro
+    REST_FRAMEWORK.update({
+    'DEFAULT_LOGGER': 'drf_logger',
+    'LOGGING': {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'drf_logger': {
+                'handlers': ['console'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+        },
+    },
+})
+

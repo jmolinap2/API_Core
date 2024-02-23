@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User, AbstractUser, Group, Permission
 
-
+#api\models.py
 # Extiende el modelo de usuario de Django para agregar campos adicionales
 class User(AbstractUser): 
     image = models.ImageField(upload_to='profile_images/', null=True, blank=True, verbose_name='Imagen')
@@ -10,7 +10,6 @@ class User(AbstractUser):
     descripcion = models.TextField(blank=True, null=True)
     numero_celular = models.CharField(max_length=15, blank=True, null=True)
     
-
     def __str__(self):
         return self.username
     def get_professional_images(self):
