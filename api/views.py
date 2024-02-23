@@ -83,7 +83,7 @@ class ProfesionalServicioViewSet(viewsets.ModelViewSet):
     serializer_class = ProfesionalServicioSerializer
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny] #Quitar luego xd
+    permission_classes = [AllowAny] #Quitar luego en produccion
     queryset = Profesional.objects.all()
     serializer_class = ProfesionalSerializer
 

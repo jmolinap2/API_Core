@@ -1,7 +1,9 @@
+from asyncio import exceptions
 from collections import defaultdict
 from rest_framework import serializers
 from django.contrib.auth import authenticate, login
 from drf import settings
+from django.contrib.auth import get_user_model
 from .models import ProfessionalImage, User, Servicio,Profesional,Ciudad,Provincia,Pais ,ProfesionalServicio
 
 #Registro de servicios
@@ -59,15 +61,22 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields ='__all__'
+        read_only_fields = ('date_joined','last_login')
 
     def create(self, validated_data):
-        # Extraer la contraseña del validated_data
         password = validated_data.pop('password', None)
-        # Crear el usuario con la contraseña
-        user = User(**validated_data)
-        if password is not None:
-            user.set_password(password)  # Establecer la contraseña encriptada
-        user.save()
+        user = get_user_model().objects.create_user(**validated_data, password=password)
+
+        # Obtener datos de grupos y manejar posibles errores
+        groups_data = validated_data.pop('groups', None)
+        if groups_data:
+            try:
+                # Usa groups.set() para asignar grupos correctamente
+                user.groups.set(groups_data)
+            except exceptions.ObjectDoesNotExist:
+                # Maneja cualquier excepción potencial aquí, p.ej., registra o devuelve una respuesta de error
+                ...
+
         return user
          
 class ProfesionalSerializer(serializers.ModelSerializer):
@@ -76,13 +85,14 @@ class ProfesionalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Profesional
-        fields = ['id', 'user', 'biografia', 'professional_images']
+        fields = '__all__'
     def get_professional_images(self, obj):
         professional_images = obj.user.professional_images.all()
         return ProfessionalImageSerializer(professional_images, many=True).data
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        user = User.objects.create(**user_data)
+        password = user_data.pop('password', None)  # Extraer la contraseña del usuario
+        user = User.objects.create_user(**user_data, password=password)
         professional = Profesional.objects.create(user=user, **validated_data)
         return professional
     
