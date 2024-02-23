@@ -65,7 +65,19 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
-        user = get_user_model().objects.create_user(**validated_data, password=password)
+        age = validated_data.pop('age', None)
+        descripcion = validated_data.pop('descripcion', None)
+        email = validated_data.pop('email', None)
+        first_name = validated_data.pop('first_name', None)
+        last_name = validated_data.pop('last_name', None)
+        numero_celular = validated_data.pop('numero_celular', None)
+        username = validated_data.pop('username', None)
+        user = User(username=username, descripcion=descripcion,
+                    email=email, first_name=first_name,
+                    last_name=last_name, age=age,numero_celular=numero_celular ) #no debo poner lo demas datos de user?
+        user.save() #no, eso es por default
+        user.set_password(password)
+        user.save() # como se hace para entrar en este modo? eso de debuguear f8, como pongo siguiente paso?
 
         # Obtener datos de grupos y manejar posibles errores
         groups_data = validated_data.pop('groups', None)
