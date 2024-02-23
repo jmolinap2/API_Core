@@ -1,5 +1,4 @@
 from asyncio import exceptions
-from collections import defaultdict
 from rest_framework import serializers
 from django.contrib.auth import authenticate, login
 from drf import settings
@@ -78,7 +77,6 @@ class UserSerializer(serializers.ModelSerializer):
         user.save() #no, eso es por default
         user.set_password(password)
         user.save() # como se hace para entrar en este modo? eso de debuguear f8, como pongo siguiente paso?
-
         # Obtener datos de grupos y manejar posibles errores
         groups_data = validated_data.pop('groups', None)
         if groups_data:
@@ -94,13 +92,13 @@ class UserSerializer(serializers.ModelSerializer):
 class ProfesionalSerializer(serializers.ModelSerializer):
     user = UserSerializer()  # Anidamos el UserSerializer aquí
     professional_images = ProfessionalImageSerializer(many=True, read_only=True)  # Agregamos las imágenes profesionales
-
     class Meta:
         model = Profesional
         fields = '__all__'
     def get_professional_images(self, obj):
         professional_images = obj.user.professional_images.all()
         return ProfessionalImageSerializer(professional_images, many=True).data
+
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         password = user_data.get('password', None)
