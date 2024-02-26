@@ -51,11 +51,18 @@ class LoginSerializer(serializers.Serializer):
 class ProfessionalImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProfessionalImage
-        fields ='__all__'
+        fields = ('id', 'image', 'user')
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Obtenemos la URL completa de la imagen
+        image_url = instance.image.url if instance.image else None
+        representation['image'] = self.context['request'].build_absolute_uri(image_url)
+        return representation
         
 #Registro de usuarios
 class UserSerializer(serializers.ModelSerializer):
-    professional_images = ProfessionalImageSerializer(many=True, read_only=True)
+    
     password = serializers.CharField(write_only=True)  # Campo de contraseña solo para escritura
     class Meta:
         model = User
@@ -91,14 +98,17 @@ class UserSerializer(serializers.ModelSerializer):
          
 class ProfesionalSerializer(serializers.ModelSerializer):
     user = UserSerializer()  # Anidamos el UserSerializer aquí
-    professional_images = ProfessionalImageSerializer(many=True, read_only=True)  # Agregamos las imágenes profesionales
+    professional_images = serializers.SerializerMethodField()
     class Meta:
         model = Profesional
         fields = '__all__'
     def get_professional_images(self, obj):
-        professional_images = obj.user.professional_images.all()
-        return ProfessionalImageSerializer(professional_images, many=True).data
-
+        # Obtenemos las imágenes profesionales asociadas al profesional actual
+        professional_images = ProfessionalImage.objects.filter(user=obj.user)
+        # Serializamos las imágenes profesionales y retornamos los datos
+        serializer = ProfessionalImageSerializer(professional_images, many=True, context=self.context)
+        return serializer.data
+    
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         password = user_data.get('password', None)

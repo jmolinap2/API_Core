@@ -12,8 +12,7 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.username
-    def get_professional_images(self):
-        return ProfessionalImage.objects.filter(user=self)
+    
 
 # Modelo para las imágenes de perfil de usuario
 
@@ -33,6 +32,8 @@ class Profesional(models.Model):
 
     def __str__(self):
         return self.user.username
+    def get_professional_images(self):
+        return ProfessionalImage.objects.filter(user=self.user)
     
 #Servicio y ServicioProfesional
 class Servicio(models.Model):

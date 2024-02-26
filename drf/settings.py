@@ -159,12 +159,7 @@ REST_FRAMEWORK = {
 if DEBUG:
     REST_FRAMEWORK.update({
         #borrar en debug
-        'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework.authentication.TokenAuthentication',
-        ],
-        'DEFAULT_PERMISSION_CLASSES': [
-            'rest_framework.permissions.IsAuthenticated',
-        ],
+        
     })
 
 # Configuración específica para producción, incluida la autenticación JWT
