@@ -158,7 +158,13 @@ REST_FRAMEWORK = {
 # Configuración específica para desarrollo
 if DEBUG:
     REST_FRAMEWORK.update({
-        #borrar en debug
+        #borrar en debug luego
+        'DEFAULT_AUTHENTICATION_CLASSES': [
+            'rest_framework.authentication.TokenAuthentication',
+        ],
+        'DEFAULT_PERMISSION_CLASSES': [
+            'rest_framework.permissions.IsAuthenticated',
+        ],
         
     })
 
@@ -173,22 +179,32 @@ else:
         ],
     })
 # Configuración del registro
-    REST_FRAMEWORK.update({
+REST_FRAMEWORK.update({
     'DEFAULT_LOGGER': 'drf_logger',
     'LOGGING': {
         'version': 1,
         'disable_existing_loggers': False,
         'handlers': {
             'console': {
-                'level': 'DEBUG',
+                'level': 'INFO',  # Adjust level as needed (e.g., DEBUG for more details)
                 'class': 'logging.StreamHandler',
+            },
+            'file': {
+                'level': 'DEBUG',  # Log all messages to the file
+                'class': 'logging.FileHandler',
+                'filename': './registro.log',
             },
         },
         'loggers': {
             'drf_logger': {
-                'handlers': ['console'],
-                'level': 'DEBUG',
-                'propagate': False,
+                'handlers': ['console', 'file'],  # Log to both console and file
+                'level': 'DEBUG',  # Log all messages at DEBUG level
+                'propagate': True,
+            },
+            'django': {
+                'handlers': ['console', 'file'],  # Log to both console and file
+                'level': 'DEBUG',  # Log all messages at DEBUG level
+                'propagate': True,
             },
         },
     },

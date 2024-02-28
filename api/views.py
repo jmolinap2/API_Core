@@ -53,14 +53,22 @@ class LoginView(APIView):
             return Response({"detail": "Credenciales inválidas."}, status=status.HTTP_400_BAD_REQUEST)
     
 class Logout(APIView):
-    def get(self, request, format=None):
+    def post(self, request, format=None):
         # Verificar si el usuario está autenticado
         if request.user.is_authenticated:
-            # Eliminar el token de autenticación del usuario
-            request.user.auth_token.delete()
-            # Desautenticar al usuario
-            logout(request)
-            return Response({"detail": "Usuario deslogueado exitosamente."}, status=status.HTTP_200_OK)
+            # Obtener el token de autenticación del usuario desde los encabezados de autorización
+            auth_header = request.headers.get('Authorization')
+            if auth_header and auth_header.startswith('Token '):
+                provided_token = auth_header.split(' ')[1]
+                # Verificar si el token proporcionado coincide con el token del usuario
+                if provided_token == request.user.auth_token.key:
+                    # Eliminar el token de autenticación del usuario
+                    request.user.auth_token.delete()
+                    return Response({"detail": "Usuario deslogueado exitosamente."}, status=status.HTTP_200_OK)
+                else:
+                    return Response({"detail": "Token de autenticación inválido."}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({"detail": "Encabezado de autorización no válido."}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({"detail": "No hay usuario autenticado."}, status=status.HTTP_400_BAD_REQUEST)
        

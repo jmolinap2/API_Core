@@ -72,10 +72,10 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         password = validated_data.pop('password', None)
         age = validated_data.pop('age', None)
-        descripcion = validated_data.pop('descripcion', None)
+        descripcion = validated_data.pop('descripcion', '')
         email = validated_data.pop('email', None)
-        first_name = validated_data.pop('first_name', None)
-        last_name = validated_data.pop('last_name', None)
+        first_name = validated_data.pop('first_name', '')
+        last_name = validated_data.pop('last_name', '')
         numero_celular = validated_data.pop('numero_celular', None)
         username = validated_data.pop('username', None)
         user = User(username=username, descripcion=descripcion,
