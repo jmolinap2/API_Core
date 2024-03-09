@@ -62,41 +62,39 @@ class ProfessionalImageSerializer(serializers.ModelSerializer):
         
 #Registro de usuarios
 class UserSerializer(serializers.ModelSerializer):
-    
-    password = serializers.CharField(write_only=True)  # Campo de contraseña solo para escritura
+    password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields ='__all__'
-        read_only_fields = ('date_joined','last_login')
+        fields = '__all__'
+        read_only_fields = ('date_joined', 'last_login')
 
     def create(self, validated_data):
-        password = validated_data.pop('password', None)
-        age = validated_data.pop('age', None)
-        descripcion = validated_data.pop('descripcion', '')
-        email = validated_data.pop('email', None)
-        first_name = validated_data.pop('first_name', '')
-        last_name = validated_data.pop('last_name', '')
-        numero_celular = validated_data.pop('numero_celular', None)
-        username = validated_data.pop('username', None)
-        user = User(username=username, descripcion=descripcion,
-                    email=email, first_name=first_name,
-                    last_name=last_name, age=age,numero_celular=numero_celular ) #no debo poner lo demas datos de user?
-        user.save() #no, eso es por default
-        user.set_password(password)
-        user.save() # como se hace para entrar en este modo? eso de debuguear f8, como pongo siguiente paso?
-        # Obtener datos de grupos y manejar posibles errores
         groups_data = validated_data.pop('groups', None)
-        if groups_data:
+        user = super().create(validated_data)
+        self._update_user(user, validated_data, groups_data)
+        return user
+
+    def update(self, instance, validated_data):
+        groups_data = validated_data.pop('groups', None)
+        user = super().update(instance, validated_data)
+        self._update_user(user, validated_data, groups_data)
+        return user
+
+    def _update_user(self, user, validated_data, groups_data):
+        password = validated_data.get('password')
+        if password:
+            user.set_password(password)
+        user.save()
+        if groups_data is not None:
             try:
-                # Usa groups.set() para asignar grupos correctamente
                 user.groups.set(groups_data)
             except exceptions.ObjectDoesNotExist:
-                # Maneja cualquier excepción potencial aquí, p.ej., registra o devuelve una respuesta de error
+                # Manejar cualquier excepción potencial aquí
                 ...
-
-        return user
+        
          
-class ProfesionalSerializer(serializers.ModelSerializer):
+class UserProfesionalSerializer(serializers.ModelSerializer):
     user = UserSerializer()  # Anidamos el UserSerializer aquí
     professional_images = serializers.SerializerMethodField()
     class Meta:
@@ -141,12 +139,30 @@ class ProfesionalSerializer(serializers.ModelSerializer):
         professional = Profesional.objects.create(user=user, **validated_data)
         return professional
 
-class UserProfesionalSerializer(serializers.ModelSerializer):
-    user = UserSerializer()  # Anidar el UserSerializer aquí
+class ProfesionalSerializer(serializers.ModelSerializer):
 
+    professional_images = serializers.SerializerMethodField()
+    user_image = serializers.SerializerMethodField()
     class Meta:
         model = Profesional
         fields = '__all__'
+        
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['username'] = instance.user.username  # Agregar el nombre de usuario a la representación
+        return representation
+    def get_professional_images(self, obj):
+        # Obtenemos las imágenes profesionales asociadas al profesional actual
+        professional_images = ProfessionalImage.objects.filter(user=obj.user)
+        # Serializamos las imágenes profesionales y retornamos los datos
+        serializer = ProfessionalImageSerializer(professional_images, many=True, context=self.context)
+        return serializer.data
+    def get_user_image(self, obj):  # Método para obtener la imagen del usuario
+        if obj.user.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.user.image.url)
+        return None
 
 #ubicacion
 class CiudadSerializer(serializers.ModelSerializer):

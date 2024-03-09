@@ -76,7 +76,15 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
+class UserProfesionalViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny] #Quitar luego en produccion
+    queryset = Profesional.objects.all()
+    serializer_class = UserProfesionalSerializer
+
+class ProfesionalViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny] #Quitar luego en produccion
+    queryset = Profesional.objects.all()
+    serializer_class = ProfesionalSerializer
 
 class ServicioViewSet(viewsets.ModelViewSet):  
     queryset = Servicio.objects.all()
@@ -90,23 +98,12 @@ class ProfesionalServicioViewSet(viewsets.ModelViewSet):
     queryset = ProfesionalServicio.objects.all()
     serializer_class = ProfesionalServicioSerializer
 
-class ProfesionalViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny] #Quitar luego en produccion
-    queryset = Profesional.objects.all()
-    serializer_class = ProfesionalSerializer
+
 
 class ProfessionalImageViewSet(viewsets.ModelViewSet):
+    permission_classes = [AllowAny]
     queryset = ProfessionalImage.objects.all()
     serializer_class = ProfessionalImageSerializer
-    
-class UserProfesionalViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.filter(profesional_data__isnull=False)  # Filtra solo los usuarios que tienen datos de profesional
-    serializer_class = UserProfesionalSerializer
-
-class UserProfesionaloNoViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()  # Tieneno o no datos de profesional
-    serializer_class = UserProfesionalSerializer
-
 
 class PaisViewSet(viewsets.ModelViewSet):
     queryset = Pais.objects.all()

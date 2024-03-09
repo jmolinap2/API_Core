@@ -16,13 +16,15 @@ router = routers.DefaultRouter() """
 router = routers.DefaultRouter()
 
 router.register(r'users', views.UserViewSet, basename='users')
+router.register(r'userprofesionales', views.UserProfesionalViewSet, basename='userprofesionales')
+router.register(r'profesionales', views.ProfesionalViewSet, basename='profesionales')
+
+
 router.register(r'servicios', views.ServicioViewSet, basename='servicios')
 router.register(r'profesionalserviciosrelacion', views.ProfesionalServicioRelacionViewSet, basename='profesionalserviciosrelacion') 
 router.register(r'profesionalservicios', views.ProfesionalServicioViewSet, basename='profesionalservicios') 
-router.register(r'profesionales', views.ProfesionalViewSet, basename='profesionales')
 router.register(r'profesionalesImagenes', views.ProfessionalImageViewSet, basename='profesionalesImagenes')
-router.register(r'userprofesionales', views.UserProfesionalViewSet, basename='userprofesionales')
-router.register(r'userprofesionales', views.UserProfesionaloNoViewSet, basename='userprofesionalesoNo')
+
 
 """ router.register(r'paises', views.PaisViewSet)
 router.register(r'provincias', views.ProvinciaViewSet)
