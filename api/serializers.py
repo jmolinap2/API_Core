@@ -62,7 +62,8 @@ class ProfessionalImageSerializer(serializers.ModelSerializer):
         
 #Registro de usuarios
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True,required=False)
+    image = serializers.ImageField(required=False)
 
     class Meta:
         model = User
@@ -76,9 +77,27 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
     def update(self, instance, validated_data):
+        image = validated_data.get('image', None)
+        password = validated_data.pop('password', None)
         groups_data = validated_data.pop('groups', None)
+        # Llamar al método 'update' del serializador base para actualizar los campos restantes
         user = super().update(instance, validated_data)
+
+        # Si se proporcionó un valor para 'image', actualizarlo
+        if image is not None:
+            user.image = image
+
+        # Si se proporcionó un valor para 'password', actualizarlo
+        if password is not None:
+            user.set_password(password)
+
+        # Guardar el usuario solo si se han realizado cambios
+        if image is not None or password is not None:
+            user.save()
+
+        # Actualizar los grupos si es necesario
         self._update_user(user, validated_data, groups_data)
+
         return user
 
     def _update_user(self, user, validated_data, groups_data):

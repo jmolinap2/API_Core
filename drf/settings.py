@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-m$1xiohbetxtnfa9%zaaxgp!uh7_r*xu(1e!s3h$)&c7_q--47
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*',]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -54,8 +54,14 @@ MIS_APPS = [
 ]
 
 INSTALLED_APPS = DJANGO_CONTRIB_APPS + THIRD_PARTY_APPS + MIS_APPS
-CORS_ORIGIN_ALLOW_ALL = True
 
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:4200',  # Origen de tu aplicación Angular
+    'http://127.0.0.1:4200',
+]
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -66,6 +72,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'drf.middleware.TokenAuthenticationMiddleware',
     'drf.middleware.RequestLoggingMiddleware',
 ]
 

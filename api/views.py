@@ -5,6 +5,7 @@ from django.contrib.auth import authenticate, login
 from .models import ProfesionalServicio, ProfessionalImage, User, Servicio,Profesional,Ciudad,Provincia,Pais
 from rest_framework.views import APIView
 from django.views.generic.edit import FormView
+from django.contrib.sessions.models import Session
 from django.contrib.auth import login,logout,authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
@@ -25,11 +26,13 @@ class LoginView(APIView):
             token, created = Token.objects.get_or_create(user=user)
             user_data = UserSerializer(user).data
             user_data['token'] = token.key
-
+            sessionid = request.session.session_key
             if created:
-                return Response({"user": user_data, "detail": "Token creado exitosamente."}, status=status.HTTP_201_CREATED)
+                return Response({"user": user_data, "sessionid": sessionid, "detail": "Token creado exitosamente."},
+                                status=status.HTTP_201_CREATED)
             else:
-                return Response({"user": user_data, "detail": "Usuario ya estaba logueado."}, status=status.HTTP_200_OK)
+                return Response({"user": user_data, "sessionid": sessionid, "detail": "Usuario ya estaba logueado."},
+                                status=status.HTTP_200_OK)
 
         # Verificar las credenciales del usuario
         username = request.data.get('username')
@@ -44,16 +47,21 @@ class LoginView(APIView):
             # Serializar los datos del usuario y crear la respuesta
             user_data = UserSerializer(user).data
             user_data['token'] = token.key
-
+            sessionid = request.session.session_key
             if created:
-                return Response({"user": user_data, "detail": "Token creado exitosamente."}, status=status.HTTP_201_CREATED)
+                return Response({"user": user_data, "sessionid": sessionid, "detail": "Token creado exitosamente."},
+                                status=status.HTTP_201_CREATED)
             else:
-                return Response({"user": user_data, "detail": "Usuario ya estaba logueado."}, status=status.HTTP_200_OK)
+                return Response({"user": user_data, "sessionid": sessionid, "detail": "Usuario ya estaba logueado."},
+                                status=status.HTTP_200_OK)
         else:
             return Response({"detail": "Credenciales inválidas."}, status=status.HTTP_400_BAD_REQUEST)
     
 class Logout(APIView):
+
     def post(self, request, format=None):
+        print('headers que llegan a Logout',request.headers)
+
         # Verificar si el usuario está autenticado
         if request.user.is_authenticated:
             # Obtener el token de autenticación del usuario desde los encabezados de autorización
@@ -73,7 +81,7 @@ class Logout(APIView):
             return Response({"detail": "No hay usuario autenticado."}, status=status.HTTP_400_BAD_REQUEST)
        
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
 class UserProfesionalViewSet(viewsets.ModelViewSet):
@@ -82,7 +90,7 @@ class UserProfesionalViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfesionalSerializer
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny] #Quitar luego en produccion
+
     queryset = Profesional.objects.all()
     serializer_class = ProfesionalSerializer
 
