@@ -81,7 +81,7 @@ class Logout(APIView):
             return Response({"detail": "No hay usuario autenticado."}, status=status.HTTP_400_BAD_REQUEST)
        
 class UserViewSet(viewsets.ModelViewSet):
-
+    permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 class UserProfesionalViewSet(viewsets.ModelViewSet):

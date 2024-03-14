@@ -62,8 +62,10 @@ class ProfessionalImageSerializer(serializers.ModelSerializer):
         
 #Registro de usuarios
 class UserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField( required=False)
+    #email = serializers.CharField(write_only=True, required=False)
     password = serializers.CharField(write_only=True,required=False)
-    image = serializers.ImageField(required=False)
+    #image = serializers.ImageField(required=False)
 
     class Meta:
         model = User
@@ -71,40 +73,44 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ('date_joined', 'last_login')
 
     def create(self, validated_data):
-        groups_data = validated_data.pop('groups', None)
+        groups_data = validated_data.get('groups', None)
         user = super().create(validated_data)
         self._update_user(user, validated_data, groups_data)
         return user
 
     def update(self, instance, validated_data):
+        print('validated_data: ',validated_data)
+        # Campos adicionales
+        password = validated_data.get('password', None)
+        age = validated_data.get('age', None)
+        descripcion = validated_data.get('descripcion', None)
+        first_name = validated_data.get('first_name', None)
+        last_name = validated_data.get('last_name', None)
+        numero_celular = validated_data.get('numero_celular', None)
+
+        # Campos comunes
+        email = validated_data.get('email', None)
+        username = validated_data.get('username', None)
         image = validated_data.get('image', None)
-        password = validated_data.pop('password', None)
-        groups_data = validated_data.pop('groups', None)
-        # Llamar al método 'update' del serializador base para actualizar los campos restantes
-        user = super().update(instance, validated_data)
+        groups_data = validated_data.get('groups', None)
 
-        # Si se proporcionó un valor para 'image', actualizarlo
-        if image is not None:
-            user.image = image
 
-        # Si se proporcionó un valor para 'password', actualizarlo
-        if password is not None:
-            user.set_password(password)
+        user = User(username=username, descripcion=descripcion,
+                    email=email, first_name=first_name,
+                    last_name=last_name, age=age,
+                    numero_celular=numero_celular, image=image)  # no debo poner lo demas datos de user?
+        user.save()  # no, eso es por default
+        user.set_password(password)
+        user.save()
 
-        # Guardar el usuario solo si se han realizado cambios
-        if image is not None or password is not None:
-            user.save()
 
         # Actualizar los grupos si es necesario
-        self._update_user(user, validated_data, groups_data)
+        self._update_user(user,validated_data, groups_data)
 
         return user
 
-    def _update_user(self, user, validated_data, groups_data):
-        password = validated_data.get('password')
-        if password:
-            user.set_password(password)
-        user.save()
+    def _update_user(self, user, groups_data):
+
         if groups_data is not None:
             try:
                 user.groups.set(groups_data)
