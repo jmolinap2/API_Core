@@ -46,6 +46,7 @@ THIRD_PARTY_APPS = [
     'rest_framework.authtoken',
     'coreapi',
     'corsheaders',  # CORS para permitir solicitudes desde otros dominios
+    'drf_yasg',
 ]
 
 # Tus propias aplicaciones personalizadas
@@ -157,8 +158,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
+
+TOKEN_EXPIRED_AFTER_SECONDS = 80000
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+
 }
 
 # Configuración específica para desarrollo
@@ -166,10 +170,10 @@ if DEBUG:
     REST_FRAMEWORK.update({
         #borrar en debug luego
         'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework.authentication.TokenAuthentication',
-        ],
-        'DEFAULT_PERMISSION_CLASSES': [
-            'rest_framework.permissions.IsAuthenticated',
+        #'rest_framework.authentication.TokenAuthentication',
+        #'api.authentication_mixins.Authentication',
+        ],'DEFAULT_PERMISSION_CLASSES': [
+            #'rest_framework.permissions.IsAuthenticated',
         ],
         
     })
@@ -177,12 +181,7 @@ if DEBUG:
 # Configuración específica para producción, incluida la autenticación JWT
 else:
     REST_FRAMEWORK.update({
-        'DEFAULT_AUTHENTICATION_CLASSES': [
-            'rest_framework.authentication.TokenAuthentication',
-        ],
-        'DEFAULT_PERMISSION_CLASSES': [
-            'rest_framework.permissions.IsAuthenticated',
-        ],
+        
     })
 # Configuración del registro
 REST_FRAMEWORK.update({

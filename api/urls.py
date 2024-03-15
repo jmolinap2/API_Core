@@ -1,7 +1,8 @@
 from django.urls import path, include
 from rest_framework import routers
 from api import views
-from .views import LoginView, viewsets_list
+from .views import Login, viewsets_list
+from api.user.api import user_api_view,user_detail_api_view
 
 router = routers.DefaultRouter()
 
@@ -16,6 +17,8 @@ router = routers.DefaultRouter() """
 router = routers.DefaultRouter()
 
 router.register(r'users', views.UserViewSet, basename='users')
+#router.register(r'usuarios', user_api_view, basename='usuarios')
+
 router.register(r'userprofesionales', views.UserProfesionalViewSet, basename='userprofesionales')
 router.register(r'profesionales', views.ProfesionalViewSet, basename='profesionales')
 

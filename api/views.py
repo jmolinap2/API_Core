@@ -13,77 +13,120 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny  # Importa AllowAny
 import json
+from datetime import datetime
+
+from django.contrib.sessions.models import Session
+
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.views import ObtainAuthToken
+
+from api.authentication_mixins import Authentication
+from api.serializers import UserTokenSerializer
 #login
 # Create your views here.
 #api\views.py
-#Login 
-class LoginView(APIView):
-    permission_classes = [AllowAny]
-    def post(self, request):
-        # Verificar si el usuario ya está autenticado
-        if request.user.is_authenticated:
-            user = request.user
-            token, created = Token.objects.get_or_create(user=user)
-            user_data = UserSerializer(user).data
-            user_data['token'] = token.key
-            sessionid = request.session.session_key
-            if created:
-                return Response({"user": user_data, "sessionid": sessionid, "detail": "Token creado exitosamente."},
-                                status=status.HTTP_201_CREATED)
+#Login
+class UserToken(Authentication, APIView):
+    """
+    Validate Token
+    """
+    def get(self,request,*args,**kwargs):        
+        try:
+            user_token = Token.objects.get(user = self.user)
+            user = UserTokenSerializer(self.user)
+            return Response({
+                'token': user_token.key,
+                'user': user.data
+            })
+        except:
+            return Response({
+                'error': 'Credenciales enviadas incorrectas.'
+            },status = status.HTTP_400_BAD_REQUEST)
+
+class Login(ObtainAuthToken):
+
+    def post(self,request,*args,**kwargs):
+        # send to serializer username and password
+        login_serializer = self.serializer_class(data = request.data, context = {'request':request})
+        if login_serializer.is_valid():
+            # login serializer return user in validated_data
+            user = login_serializer.validated_data['user']
+            if user.is_active:
+                token,created = Token.objects.get_or_create(user = user)
+                user_serializer = UserTokenSerializer(user)
+                if created:
+                    return Response({
+                        'token': token.key,
+                        'user': user_serializer.data,
+                        'message': 'Inicio de Sesión Exitoso.'
+                    }, status = status.HTTP_201_CREATED)
+                else:
+                    all_sessions = Session.objects.filter(expire_date__gte = datetime.now())
+                    if all_sessions.exists():
+                        for session in all_sessions:
+                            session_data = session.get_decoded()
+                            if user.id == int(session_data.get('_auth_user_id')):
+                                session.delete()
+                    token.delete()
+                    token = Token.objects.create(user = user)
+                    return Response({
+                        'token': token.key,
+                        'user': user_serializer.data,
+                        'message': 'Inicio de Sesión Exitoso.'
+                    }, status = status.HTTP_201_CREATED)
+                    """
+                    return Response({
+                        'error': 'Ya se ha iniciado sesión con este usuario.'
+                    }, status = status.HTTP_409_CONFLICT)
+                    """
             else:
-                return Response({"user": user_data, "sessionid": sessionid, "detail": "Usuario ya estaba logueado."},
-                                status=status.HTTP_200_OK)
-
-        # Verificar las credenciales del usuario
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-
-            # Obtener o crear el token del usuario
-            token, created = Token.objects.get_or_create(user=user)
-
-            # Serializar los datos del usuario y crear la respuesta
-            user_data = UserSerializer(user).data
-            user_data['token'] = token.key
-            sessionid = request.session.session_key
-            if created:
-                return Response({"user": user_data, "sessionid": sessionid, "detail": "Token creado exitosamente."},
-                                status=status.HTTP_201_CREATED)
-            else:
-                return Response({"user": user_data, "sessionid": sessionid, "detail": "Usuario ya estaba logueado."},
-                                status=status.HTTP_200_OK)
+                return Response({'error':'Este usuario no puede iniciar sesión.'}, 
+                                    status = status.HTTP_401_UNAUTHORIZED)
         else:
-            return Response({"detail": "Credenciales inválidas."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Nombre de usuario o contraseña incorrectos.'},
+                                    status = status.HTTP_400_BAD_REQUEST)
+
     
 class Logout(APIView):
 
-    def post(self, request, format=None):
-        print('headers que llegan a Logout',request.headers)
+    def get(self,request,*args,**kwargs):
+        try:
+            token = request.GET.get('token')
+            token = Token.objects.filter(key = token).first()
 
-        # Verificar si el usuario está autenticado
-        if request.user.is_authenticated:
-            # Obtener el token de autenticación del usuario desde los encabezados de autorización
-            auth_header = request.headers.get('Authorization')
-            if auth_header and auth_header.startswith('Token '):
-                provided_token = auth_header.split(' ')[1]
-                # Verificar si el token proporcionado coincide con el token del usuario
-                if provided_token == request.user.auth_token.key:
-                    # Eliminar el token de autenticación del usuario
-                    request.user.auth_token.delete()
-                    return Response({"detail": "Usuario deslogueado exitosamente."}, status=status.HTTP_200_OK)
-                else:
-                    return Response({"detail": "Token de autenticación inválido."}, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response({"detail": "Encabezado de autorización no válido."}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({"detail": "No hay usuario autenticado."}, status=status.HTTP_400_BAD_REQUEST)
-       
+            if token:
+                user = token.user
+                # delete all sessions for user
+                all_sessions = Session.objects.filter(expire_date__gte = datetime.now())
+                if all_sessions.exists():
+                    for session in all_sessions:
+                        session_data = session.get_decoded()
+                        # search auth_user_id, this field is primary_key's user on the session
+                        if user.id == int(session_data.get('_auth_user_id')):
+                            session.delete()
+                # delete user token
+                token.delete()
+                
+                session_message = 'Sesiones de usuario eliminadas.'  
+                token_message = 'Token eliminado.'
+                return Response({'token_message': token_message,'session_message':session_message},
+                                    status = status.HTTP_200_OK)
+            
+            return Response({'error':'No se ha encontrado un usuario con estas credenciales.'},
+                    status = status.HTTP_400_BAD_REQUEST)
+        except:
+            return Response({'error': 'No se ha encontrado token en la petición.'}, 
+                                    status = status.HTTP_409_CONFLICT)
+
+
 class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    
 class UserProfesionalViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny] #Quitar luego en produccion
     queryset = Profesional.objects.all()

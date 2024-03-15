@@ -20,17 +20,31 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.documentation import include_docs_urls
 from rest_framework.authtoken import views
-from api.views import LoginView, Logout#,Logout
+from api.views import Login, Logout#,Logout
 
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 
+schema_view = get_schema_view(
+    openapi.Info(
+        title="API Documentation",
+        default_version='v1',
+        description="API documentation using drf_yasg",
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('api.urls')),
     path('docs/', include_docs_urls(title='Api Documentation')),
     path('api_generate_token/', views.obtain_auth_token),
-    path('login/',LoginView.as_view(), name = 'login'),
+    path('login/',Login.as_view(), name = 'login'),
     path('logout/', Logout.as_view()),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
 # Agregar las URLs de medios solo en el entorno de desarrollo

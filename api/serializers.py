@@ -61,64 +61,60 @@ class ProfessionalImageSerializer(serializers.ModelSerializer):
         return representation
         
 #Registro de usuarios
-class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField( required=False)
-    #email = serializers.CharField(write_only=True, required=False)
-    password = serializers.CharField(write_only=True,required=False)
-    #image = serializers.ImageField(required=False)
-
+class UserTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = '__all__'
-        read_only_fields = ('date_joined', 'last_login')
+        fields = ('username','email','name','last_name')
+        
+class UserSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=False)
+    password = serializers.CharField(write_only=True, required=False)
+    class Meta:
+        model = User
+        fields ='__all__'
+        read_only_fields = ('date_joined','last_login')
 
     def create(self, validated_data):
-        groups_data = validated_data.get('groups', None)
-        user = super().create(validated_data)
-        self._update_user(user, validated_data, groups_data)
+        password = validated_data.pop('password')
+        
+        user = User.objects.create_user(**validated_data, password=password)
         return user
 
     def update(self, instance, validated_data):
-        print('validated_data: ',validated_data)
-        # Campos adicionales
-        password = validated_data.get('password', None)
-        age = validated_data.get('age', None)
-        descripcion = validated_data.get('descripcion', None)
-        first_name = validated_data.get('first_name', None)
-        last_name = validated_data.get('last_name', None)
-        numero_celular = validated_data.get('numero_celular', None)
+        if 'username' in validated_data:
+            instance.username = validated_data.get('username', instance.username)
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+            instance.set_password(password)
 
-        # Campos comunes
-        email = validated_data.get('email', None)
-        username = validated_data.get('username', None)
-        image = validated_data.get('image', None)
-        groups_data = validated_data.get('groups', None)
+        if 'groups' in validated_data:
+            groups = validated_data.pop('groups')
+            instance.groups.set(groups)
 
+        if 'user_permissions' in validated_data:
+            user_permissions = validated_data.pop('user_permissions')
+            instance.user_permissions.set(user_permissions)
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
 
-        user = User(username=username, descripcion=descripcion,
-                    email=email, first_name=first_name,
-                    last_name=last_name, age=age,
-                    numero_celular=numero_celular, image=image)  # no debo poner lo demas datos de user?
-        user.save()  # no, eso es por default
-        user.set_password(password)
-        user.save()
+        instance.save()
+        return instance
 
-
-        # Actualizar los grupos si es necesario
-        self._update_user(user,validated_data, groups_data)
-
-        return user
-
-    def _update_user(self, user, groups_data):
-
-        if groups_data is not None:
-            try:
-                user.groups.set(groups_data)
-            except exceptions.ObjectDoesNotExist:
-                # Manejar cualquier excepción potencial aquí
-                ...
+    def delete(self, instance):
+        instance.delete()
         
-         
+    
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+
+    def to_representation(self,instance):
+        return {
+            'id': instance['id'],
+            'username': instance['username'],
+            'email': instance['email'],
+            'password': instance['password']
+        }
 class UserProfesionalSerializer(serializers.ModelSerializer):
     user = UserSerializer()  # Anidamos el UserSerializer aquí
     professional_images = serializers.SerializerMethodField()
@@ -136,14 +132,14 @@ class UserProfesionalSerializer(serializers.ModelSerializer):
         user_data = validated_data.pop('user')
         password = user_data.get('password', None)
         age = user_data.pop('age', None)
-        descripcion = user_data.pop('descripcion', None)
+        
         email = user_data.pop('email', None)
-        first_name = user_data.pop('first_name', None)
+        name = user_data.pop('name', None)
         last_name = user_data.pop('last_name', None)
         numero_celular = user_data.pop('numero_celular', None)
         username = user_data.pop('username', None)
-        user = User(username=username, descripcion=descripcion,
-                    email=email, first_name=first_name,
+        user = User(username=username,
+                    email=email, name=name,
                     last_name=last_name, age=age,
                     numero_celular=numero_celular)  # no debo poner lo demas datos de user?
         user.save()  # no, eso es por default
@@ -188,6 +184,10 @@ class ProfesionalSerializer(serializers.ModelSerializer):
             if request:
                 return request.build_absolute_uri(obj.user.image.url)
         return None
+
+
+
+
 
 #ubicacion
 class CiudadSerializer(serializers.ModelSerializer):
