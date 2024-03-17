@@ -10,14 +10,12 @@ decorator==5.1.1
 Django==4.2
 django-automatic-crud==1.2.0
 django-cors-headers==4.3.1
-django-cors-middleware==1.5.0
 django-crum==0.7.9
 django-simple-history==3.5.0
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1
 drf-yasg==1.21.7
 et-xmlfile==1.1.0
-Faker==23.1.0
 future==0.18.3
 idna==3.4
 inflection==0.5.1
