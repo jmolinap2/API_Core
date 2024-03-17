@@ -9,7 +9,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 
 class RequestLoggingMiddleware(MiddlewareMixin):
     def process_request(self, request):
-        print('headers que llegan a RequestLoggingMiddleware: ', request.headers)
+        #print('headers que llegan a RequestLoggingMiddleware: ', request.headers)
         # Obtenemos la dirección IP del cliente
         ip_address = request.META.get('REMOTE_ADDR', '')
         # Si hay un usuario autenticado, lo obtenemos

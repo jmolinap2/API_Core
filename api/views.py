@@ -1,4 +1,4 @@
-from .serializers import LoginSerializer, ProfesionalServicioRelacionSerializer, ProfessionalImageSerializer, UserSerializer,ServicioSerializer,ProfesionalServicioSerializer,ProfesionalSerializer,UserProfesionalSerializer,CiudadSerializer,ProvinciaSerializer,PaisSerializer
+from .serializers import ProfesionalServicioRelacionSerializer, ProfessionalImageSerializer, UserSerializer,ServicioSerializer,ProfesionalServicioSerializer,ProfesionalSerializer,UserProfesionalSerializer,CiudadSerializer,ProvinciaSerializer,PaisSerializer
 from rest_framework.response import Response
 from rest_framework import status,viewsets
 from django.contrib.auth import authenticate, login
@@ -47,10 +47,11 @@ class UserToken(Authentication, APIView):
             },status = status.HTTP_400_BAD_REQUEST)
 
 class Login(ObtainAuthToken):
-
+    permission_classes = [AllowAny]
     def post(self,request,*args,**kwargs):
         # send to serializer username and password
         login_serializer = self.serializer_class(data = request.data, context = {'request':request})
+        print('login_serializer: ',login_serializer)
         if login_serializer.is_valid():
             # login serializer return user in validated_data
             user = login_serializer.validated_data['user']
@@ -94,8 +95,13 @@ class Logout(APIView):
 
     def get(self,request,*args,**kwargs):
         try:
-            token = request.GET.get('token')
-            token = Token.objects.filter(key = token).first()
+            auth = request.headers.get('Authorization')
+            if auth and auth.startswith('Token '):
+                print('Valor de "auth": ',auth)
+                key = auth.split(' ')[1]
+            
+                token = Token.objects.filter(key=key).first()
+                print('Valor de "token.user": ',token.user)
 
             if token:
                 user = token.user

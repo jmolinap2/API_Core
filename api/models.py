@@ -7,26 +7,43 @@ from simple_history.models import HistoricalRecords
 
 #api\models.py
 
-
-
 # Extiende el modelo de usuario de Django para agregar campos adicionales
+class UserManager(BaseUserManager):
+    def _create_user(self, username, email, name,last_name, password, is_staff, is_superuser, **extra_fields):
+        user = self.model(
+            username = username,
+            email = email,
+            name = name,
+            last_name = last_name,
+            is_staff = is_staff,
+            is_superuser = is_superuser,
+            **extra_fields
+        )
+        user.set_password(password)
+        user.save(using=self.db)
+        return user
+
+    def create_user(self, username, email, name,last_name, password=None, **extra_fields):
+        return self._create_user(username, email, name,last_name, password, False, False, **extra_fields)
+
+    def create_superuser(self, username, email, name,last_name, password=None, **extra_fields):
+        return self._create_user(username, email, name,last_name, password, True, True, **extra_fields)
 
 class User(AbstractBaseUser, PermissionsMixin):
     username=models.CharField(error_messages={'unique': 'Ya existe un usuario con ese nombre de usuario.'},
-    help_text='Requerido. 150 caracteres como máximo. Solo letras, dígitos y @/./+/-/_.',
-    max_length=150,unique=True,validators=[django.contrib.auth.validators.UnicodeUsernameValidator()],verbose_name='nombre de usuario')
+    help_text='Requerido. 150 caracteres como máximo. Solo letras, digitos y @/./+/-/_.',
+    max_length=150,unique=True,validators=[django.contrib.auth.validators.UnicodeUsernameValidator()],verbose_name='Nombre de usuario')
     email = models.EmailField('Correo Electrónico',default=f'@username.com',max_length = 255, unique = True,)
     name = models.CharField('Nombres', max_length = 255, blank = True, null = True)
     age = models.PositiveIntegerField(null=True, blank=True)
-    numero_celular = models.CharField(max_length=15, blank=True, null=True,unique = False)
+    numero_celular = models.CharField('Numero celular',max_length=15, blank=True, null=True,unique = False)
     last_name = models.CharField('Apellidos', max_length = 255, blank = True, null = True)
     date_joined= models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')
     image = models.ImageField('Imagen de perfil', upload_to='profile_images/', max_length=255, null=True, blank = True)
     is_active = models.BooleanField(default = True)
     is_staff = models.BooleanField(default = False)
     historical = HistoricalRecords()
-
-
+    objects = UserManager()
     class Meta:
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'

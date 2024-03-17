@@ -26,7 +26,7 @@ class ProfesionalServicioSerializer(serializers.ModelSerializer):
         
 
 #api\serializers.py
-class LoginSerializer(serializers.Serializer):
+""" class LoginSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=150)
     password = serializers.CharField(max_length=128, write_only=True)
 
@@ -45,7 +45,7 @@ class LoginSerializer(serializers.Serializer):
             else:
                 raise serializers.ValidationError("Credenciales inválidas.")
         else:
-            raise serializers.ValidationError("Se requiere un nombre de usuario y contraseña.")
+            raise serializers.ValidationError("Se requiere un nombre de usuario y contraseña.") """
 
 # Usuario profesional, registro
 class ProfessionalImageSerializer(serializers.ModelSerializer):
@@ -62,9 +62,10 @@ class ProfessionalImageSerializer(serializers.ModelSerializer):
         
 #Registro de usuarios
 class UserTokenSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
     class Meta:
         model = User
-        fields = ('username','email','name','last_name')
+        fields = '__all__'
         
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=False)

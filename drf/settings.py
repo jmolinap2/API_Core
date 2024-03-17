@@ -170,7 +170,7 @@ if DEBUG:
     REST_FRAMEWORK.update({
         #borrar en debug luego
         'DEFAULT_AUTHENTICATION_CLASSES': [
-        #'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
         #'api.authentication_mixins.Authentication',
         ],'DEFAULT_PERMISSION_CLASSES': [
             #'rest_framework.permissions.IsAuthenticated',
