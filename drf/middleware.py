@@ -45,9 +45,7 @@ class TokenAuthenticationMiddleware:
             # Leer datos del formulario si es multipart/form-data
             if 'multipart/form-data' in request.headers.get('Content-Type', ''):
                 # Acceder a los datos del formulario y archivos
-                form_data = request.POST
-                body = request.body
-                files_data = request.FILES
+
 
             # Leer datos de JSON si es application/json
             elif 'application/json' in request.headers.get('Content-Type', ''):
