@@ -132,7 +132,15 @@ class UserViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data,
+                                         partial=True)  # Usa request.data en lugar de request.body
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(serializer.data)
 class UserProfesionalViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny] #Quitar luego en produccion
     queryset = Profesional.objects.all()
