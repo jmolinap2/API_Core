@@ -99,7 +99,9 @@ class UserSerializer(serializers.ModelSerializer):
             user_permissions = validated_data.pop('user_permissions')
             instance.user_permissions.set(user_permissions)
         for key, value in validated_data.items():
+            print(f'{key}: ' ,value)
             setattr(instance, key, value)
+            
 
         instance.save()
         return instance

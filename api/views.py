@@ -1,6 +1,6 @@
 from .serializers import ProfesionalServicioRelacionSerializer, ProfessionalImageSerializer, UserSerializer,ServicioSerializer,ProfesionalServicioSerializer,ProfesionalSerializer,UserProfesionalSerializer,CiudadSerializer,ProvinciaSerializer,PaisSerializer
 from rest_framework.response import Response
-from rest_framework import status,viewsets
+from rest_framework import status,viewsets,permissions
 from django.contrib.auth import authenticate, login
 from .models import ProfesionalServicio, ProfessionalImage, User, Servicio,Profesional,Ciudad,Provincia,Pais
 from rest_framework.views import APIView
@@ -11,7 +11,6 @@ from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny  # Importa AllowAny
 import json
 from datetime import datetime
 
@@ -25,10 +24,12 @@ from rest_framework.authtoken.views import ObtainAuthToken
 
 from api.authentication_mixins import Authentication
 from api.serializers import UserTokenSerializer
+from rest_framework.permissions import AllowAny  # Importa AllowAny
 #login
 # Create your views here.
 #api\views.py
 #Login
+
 class UserToken(Authentication, APIView):
     """
     Validate Token
@@ -129,18 +130,32 @@ class Logout(APIView):
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
+    #permission_classes = [AllowAny]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
+    def get_permissions(self):
+        if self.action == 'create':
+            return [AllowAny()]
+        return super().get_permissions()
+    
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data)
+    
     def update(self, request, *args, **kwargs):
+        prueba = request.user
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data,
+        serializer = self.get_serializer(instance,
+                                         data=request.data,
                                          partial=True)  # Usa request.data en lugar de request.body
         serializer.is_valid(raise_exception=True)
         serializer.save()
 
         return Response(serializer.data)
+    
 class UserProfesionalViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny] #Quitar luego en produccion
     queryset = Profesional.objects.all()

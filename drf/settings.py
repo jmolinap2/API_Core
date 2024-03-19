@@ -58,9 +58,15 @@ INSTALLED_APPS = DJANGO_CONTRIB_APPS + THIRD_PARTY_APPS + MIS_APPS
 
 
 CORS_ORIGIN_WHITELIST = [
+    'https://xf0hbthg-4200.brs.devtunnels.ms',
     'http://localhost:4200',  # Origen de tu aplicación Angular
     'http://127.0.0.1:4200',
+    
 ]
+CORS_ALLOWED_ORIGINS = [
+    'https://xf0hbthg-4200.brs.devtunnels.ms',  
+]
+CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 MIDDLEWARE = [
@@ -168,14 +174,12 @@ REST_FRAMEWORK = {
 # Configuración específica para desarrollo
 if DEBUG:
     REST_FRAMEWORK.update({
-        #borrar en debug luego
         'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        #'api.authentication_mixins.Authentication',
-        ],'DEFAULT_PERMISSION_CLASSES': [
-            #'rest_framework.permissions.IsAuthenticated',
+            'rest_framework.authentication.TokenAuthentication',
         ],
-        
+        'DEFAULT_PERMISSION_CLASSES': [
+            'rest_framework.permissions.IsAuthenticated',
+        ],
     })
 
 # Configuración específica para producción, incluida la autenticación JWT
@@ -184,7 +188,7 @@ else:
         
     })
 # Configuración del registro
-REST_FRAMEWORK.update({
+""" REST_FRAMEWORK.update({
     'DEFAULT_LOGGER': 'drf_logger',
     'LOGGING': {
         'version': 1,
@@ -214,4 +218,4 @@ REST_FRAMEWORK.update({
         },
     },
 })
-
+ """
