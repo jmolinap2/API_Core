@@ -30,6 +30,7 @@ from rest_framework.permissions import AllowAny  # Importa AllowAny
 #api\views.py
 #Login
 
+    
 class UserToken(Authentication, APIView):
     """
     Validate Token
@@ -57,6 +58,7 @@ class Login(ObtainAuthToken):
             # login serializer return user in validated_data
             user = login_serializer.validated_data['user']
             if user.is_active:
+                login(request, user)  # Iniciar sesión en Django
                 token,created = Token.objects.get_or_create(user = user)
                 user_serializer = UserTokenSerializer(user)
                 if created:

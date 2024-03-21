@@ -187,6 +187,9 @@ else:
     REST_FRAMEWORK.update({
         
     })
+
+
+LOGTAIL_UPDATE_INTERVAL = 2000 # El valor predeterminado es 3000 (tres segundos)
 # Configuración del registro
 """ REST_FRAMEWORK.update({
     'DEFAULT_LOGGER': 'drf_logger',
