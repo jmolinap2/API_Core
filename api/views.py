@@ -58,10 +58,11 @@ class Login(ObtainAuthToken):
             # login serializer return user in validated_data
             user = login_serializer.validated_data['user']
             if user.is_active:
-                login(request, user)  # Iniciar sesión en Django
+                
                 token,created = Token.objects.get_or_create(user = user)
                 user_serializer = UserTokenSerializer(user)
                 if created:
+                    login(request, user)  # Iniciar sesión en Django
                     return Response({
                         'token': token.key,
                         'user': user_serializer.data,
@@ -72,9 +73,12 @@ class Login(ObtainAuthToken):
                     if all_sessions.exists():
                         for session in all_sessions:
                             session_data = session.get_decoded()
+                            # search auth_user_id, this field is primary_key's user on the session
                             if user.id == int(session_data.get('_auth_user_id')):
                                 session.delete()
+                    # delete user token
                     token.delete()
+                    login(request, user)  # Iniciar sesión en Django
                     token = Token.objects.create(user = user)
                     return Response({
                         'token': token.key,
@@ -96,7 +100,7 @@ class Login(ObtainAuthToken):
     
 class Logout(APIView):
 
-    def get(self,request,*args,**kwargs):
+    def post(self,request,*args,**kwargs):
         try:
             auth = request.headers.get('Authorization')
             if auth and auth.startswith('Token '):
@@ -164,9 +168,13 @@ class UserProfesionalViewSet(viewsets.ModelViewSet):
     serializer_class = UserProfesionalSerializer
 
 class ProfesionalViewSet(viewsets.ModelViewSet):
-
+    permission_classes = [AllowAny]
     queryset = Profesional.objects.all()
     serializer_class = ProfesionalSerializer
+    def get_permissions(self):
+        if self.action == 'retrieve':
+            return [AllowAny()]
+        return super().get_permissions()
 
 class ServicioViewSet(viewsets.ModelViewSet):  
     queryset = Servicio.objects.all()
