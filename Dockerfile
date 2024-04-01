@@ -20,8 +20,6 @@ COPY . .
 
 # Expón el puerto 8000 para acceder a la aplicación
 EXPOSE 8000
-# Ejecuta las migraciones de Django
-#RUN python manage.py migrate
 
 # Comando de inicio para ejecutar el servidor Django
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

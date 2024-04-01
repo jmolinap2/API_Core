@@ -11,7 +11,9 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from .base import *
 import os
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,9 +26,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-m$1xiohbetxtnfa9%zaaxgp!uh7_r*xu(1e!s3h$)&c7_q--47'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -106,25 +105,6 @@ AUTH_USER_MODEL = 'api.User'
 
 
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-# Configuración por defecto sin el host
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'CarinosasAPI_db',
-        'USER': 'postgres',
-        'PASSWORD': '12345',
-        'PORT': '5432',
-    }
-}
-
-# Si se detecta que está corriendo dentro de Docker, añadir el host
-if 'DOCKER_ENV' in os.environ:
-    DATABASES['default']['HOST'] = 'db'
-
-
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -195,35 +175,3 @@ else:
 
 
 LOGTAIL_UPDATE_INTERVAL = 2000 # El valor predeterminado es 3000 (tres segundos)
-# Configuración del registro
-""" REST_FRAMEWORK.update({
-    'DEFAULT_LOGGER': 'drf_logger',
-    'LOGGING': {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'level': 'INFO',  # Adjust level as needed (e.g., DEBUG for more details)
-                'class': 'logging.StreamHandler',
-            },
-            'file': {
-                'level': 'DEBUG',  # Log all messages to the file
-                'class': 'logging.FileHandler',
-                'filename': './registro.log',
-            },
-        },
-        'loggers': {
-            'drf_logger': {
-                'handlers': ['console', 'file'],  # Log to both console and file
-                'level': 'DEBUG',  # Log all messages at DEBUG level
-                'propagate': True,
-            },
-            'django': {
-                'handlers': ['console', 'file'],  # Log to both console and file
-                'level': 'DEBUG',  # Log all messages at DEBUG level
-                'propagate': True,
-            },
-        },
-    },
-})
- """
