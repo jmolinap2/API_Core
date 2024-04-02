@@ -6,7 +6,7 @@ Env.read_env()
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 
 # Configuraciones base de la aplicación
-SECRET_KEY = env('SECRET_KEY')
+#SECRET_KEY = env('SECRET_KEY')
 if ENVIRONMENT == 'development':
     DEBUG = True
     ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
