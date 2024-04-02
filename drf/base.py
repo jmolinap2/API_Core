@@ -5,7 +5,8 @@ env = Env()
 Env.read_env()
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 print('Entorno: ',ENVIRONMENT )
-print('Entorno: ',ENVIRONMENT )
+
+DATABASE_URL=env('DATABASE_URL')
 
 # Configuraciones base de la aplicación
 #SECRET_KEY = env('SECRET_KEY')
@@ -24,6 +25,7 @@ else:
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Configuración de la base de datos
+DATABASES = {}
     
 if ENVIRONMENT == 'development':
     DATABASES = {
@@ -37,6 +39,6 @@ if ENVIRONMENT == 'development':
     }
 
 if ENVIRONMENT == 'production':
-    DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
+    DATABASES['default'] = dj_database_url.parse(DATABASE_URL)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
