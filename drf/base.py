@@ -37,8 +37,6 @@ if ENVIRONMENT == 'development':
     }
 
 if ENVIRONMENT == 'production':
-    DATABASES['default'] = dj_database_url.parse('postgresql://postgres:dMGvaakLJELZvTAacbQXowPiEZsWEZit@monorail.proxy.rlwy.net:15900/railway')
-if ENVIRONMENT == 'production':
     DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
