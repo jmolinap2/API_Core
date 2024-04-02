@@ -8,7 +8,7 @@ Env.read_env()
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 print('Entorno: ',ENVIRONMENT )
 print('Deberia ige: ')
-print('Base: ',env('DATABASE_URL') )
+print('Base: ',env('RAILWAY_PUBLIC_DOMAIN') )
 
 DATABASE_URL=env('DATABASE_URL')
 
