@@ -32,7 +32,7 @@ if ENVIRONMENT == 'development':
             'PORT': env('DATABASE_PORT'),
         }
     }
-if ENVIRONMENT == 'development':
+if ENVIRONMENT == 'production':
     DATABASES['default'] = dj_database_url.parse('postgresql://postgres:dMGvaakLJELZvTAacbQXowPiEZsWEZit@monorail.proxy.rlwy.net:15900/railway')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
