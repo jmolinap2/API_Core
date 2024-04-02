@@ -9,10 +9,12 @@ ENVIRONMENT = env('ENVIRONMENT', default='production')
 SECRET_KEY = env('SECRET_KEY')
 if ENVIRONMENT == 'development':
     DEBUG = True
+    ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 else:
     DEBUG = False
+    ALLOWED_HOSTS = ['*']
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS',default='*')
+
 
 # Configuraciones de la base de datos (se sobreescribirán en producción)
 
@@ -30,7 +32,7 @@ if ENVIRONMENT == 'development':
             'PORT': env('DATABASE_PORT'),
         }
     }
-if ENVIRONMENT == 'production':
+if ENVIRONMENT == 'development':
     DATABASES['default'] = dj_database_url.parse('postgresql://postgres:dMGvaakLJELZvTAacbQXowPiEZsWEZit@monorail.proxy.rlwy.net:15900/railway')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
