@@ -4,7 +4,7 @@ from environ import Env
 env = Env()
 Env.read_env()
 ENVIRONMENT = env('ENVIRONMENT', default='production')
-
+print('Entorno: ',ENVIRONMENT )
 # Configuraciones base de la aplicación
 #SECRET_KEY = env('SECRET_KEY')
 if ENVIRONMENT == 'development':
@@ -35,6 +35,7 @@ if ENVIRONMENT == 'development':
 
 if ENVIRONMENT == 'production':
     DATABASES['default'] = dj_database_url.parse('postgresql://postgres:dMGvaakLJELZvTAacbQXowPiEZsWEZit@monorail.proxy.rlwy.net:15900/railway')
+DATABASES['default'] = dj_database_url.parse('postgresql://postgres:dMGvaakLJELZvTAacbQXowPiEZsWEZit@monorail.proxy.rlwy.net:15900/railway')
 print('Entorno: ',ENVIRONMENT )
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
