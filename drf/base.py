@@ -25,7 +25,10 @@ else:
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 # Configuración de la base de datos
-DATABASES = {}
+DATABASES = {
+        'default': {
+        }
+    }
     
 if ENVIRONMENT == 'development':
     DATABASES = {
