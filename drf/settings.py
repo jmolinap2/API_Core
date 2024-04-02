@@ -17,7 +17,7 @@ ALLOWED_HOSTS
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+DATABASES['default'] = dj_database_url.parse('postgresql://postgres:dMGvaakLJELZvTAacbQXowPiEZsWEZit@monorail.proxy.rlwy.net:15900/railway')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
