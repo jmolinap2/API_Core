@@ -5,6 +5,7 @@ env = Env()
 Env.read_env()
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 print('Entorno: ',ENVIRONMENT )
+print(env('DATABASE_URL'))
 
 DATABASE_URL=env('DATABASE_URL')
 
