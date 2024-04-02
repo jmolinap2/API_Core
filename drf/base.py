@@ -1,11 +1,13 @@
 from pathlib import Path
 import dj_database_url
+
 from environ import Env
 env = Env()
 Env.read_env()
+
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 print('Entorno: ',ENVIRONMENT )
-print(env('DATABASE_URL'))
+print('Deberia ige: ',env('DATABASE_URL'))
 
 DATABASE_URL=env('DATABASE_URL')
 
