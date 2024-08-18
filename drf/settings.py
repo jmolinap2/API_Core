@@ -45,7 +45,7 @@ THIRD_PARTY_APPS = [
     'rest_framework.authtoken',
     'coreapi',
     'corsheaders',  # CORS para permitir solicitudes desde otros dominios
-    'drf_yasg',
+    'drf_yasg'
 ]
 
 # Tus propias aplicaciones personalizadas
