@@ -31,14 +31,18 @@ if ENVIRONMENT == 'development':
     }
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
     
-    # Imprimir solo si no se ha hecho antes
     # Verificar si es la instancia principal del proceso
+    from datetime import datetime
+    import django
+
     if os.environ.get('RUN_MAIN') or os.environ.get('WERKZEUG_RUN_MAIN'):
-        # Imprimir solo si no se ha hecho antes
         if not base_printed:
-            print('Entorno:', ENVIRONMENT)
-            print('Configuración de la base de datos:', DATABASES['default'])
-            print('ALLOWED_HOSTS:', ALLOWED_HOSTS)
+            # Imprimir información
+            print(f"\033[92mEntorno:\033[0m {ENVIRONMENT}")
+            print(f"\033[94mConfiguración de la base de datos:\033[0m {DATABASES['default']}")
+            print(f"\033[93mALLOWED_HOSTS:\033[0m {ALLOWED_HOSTS}")
+            print(f"\033[95mVersión de Django:\033[0m {django.get_version()}")
+            print(f"\033[96mFecha y Hora de Inicio:\033[0m {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             base_printed = True
 
 if ENVIRONMENT == 'production':
