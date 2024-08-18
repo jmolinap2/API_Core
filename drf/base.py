@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 import dj_database_url
 from environ import Env
@@ -5,6 +6,8 @@ from environ import Env
 env = Env()
 Env.read_env()
 ENVIRONMENT = env('ENVIRONMENT', default='production')
+# Definir una variable global
+base_printed = False
 
 # Configuraciones base de la aplicación
 SECRET_KEY = env('SECRET_KEY')
@@ -27,9 +30,16 @@ if ENVIRONMENT == 'development':
         }
     }
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
-    print('Entorno:', ENVIRONMENT)
-    print('Configuración de la base de datos:', DATABASES['default'])
-    print('ALLOWED_HOSTS:', ALLOWED_HOSTS)
+    
+    # Imprimir solo si no se ha hecho antes
+    # Verificar si es la instancia principal del proceso
+    if os.environ.get('RUN_MAIN') or os.environ.get('WERKZEUG_RUN_MAIN'):
+        # Imprimir solo si no se ha hecho antes
+        if not base_printed:
+            print('Entorno:', ENVIRONMENT)
+            print('Configuración de la base de datos:', DATABASES['default'])
+            print('ALLOWED_HOSTS:', ALLOWED_HOSTS)
+            base_printed = True
 
 if ENVIRONMENT == 'production':
     DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
