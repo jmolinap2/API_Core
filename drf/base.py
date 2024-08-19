@@ -31,19 +31,30 @@ if ENVIRONMENT == 'development':
     }
     ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
     
-    # Verificar si es la instancia principal del proceso
     from datetime import datetime
-    import django
+from termcolor import colored
+from prettytable import PrettyTable
+import django
 
-    if os.environ.get('RUN_MAIN') or os.environ.get('WERKZEUG_RUN_MAIN'):
-        if not base_printed:
-            # Imprimir información
-            print(f"\033[92mEntorno:\033[0m {ENVIRONMENT}")
-            print(f"\033[94mConfiguración de la base de datos:\033[0m {DATABASES['default']}")
-            print(f"\033[93mALLOWED_HOSTS:\033[0m {ALLOWED_HOSTS}")
-            print(f"\033[95mVersión de Django:\033[0m {django.get_version()}")
-            print(f"\033[96mFecha y Hora de Inicio:\033[0m {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-            base_printed = True
+# Configurar colores
+color_azul = lambda text: colored(text, 'blue')
+color_verde = lambda text: colored(text, 'green')
+
+# Verificar si es la instancia principal del proceso
+if os.environ.get('RUN_MAIN') or os.environ.get('WERKZEUG_RUN_MAIN'):
+    if not base_printed:
+        # Usar PrettyTable para mostrar la información
+        table = PrettyTable()
+        table.field_names = ["Configuración", "Valor"]
+        table.add_row([color_azul('Entorno'), ENVIRONMENT])
+        table.add_row([color_azul('Versión de Django'), django.get_version()])
+        table.add_row([color_azul('Fecha y Hora de Inicio'), datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+        
+        print(table)
+        print(color_verde('Configuración de la base de datos:'))
+        print(DATABASES['default'])
+        print('ALLOWED_HOSTS:', ALLOWED_HOSTS)
+        base_printed = True
 
 if ENVIRONMENT == 'production':
     DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
