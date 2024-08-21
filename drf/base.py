@@ -6,17 +6,11 @@ from environ import Env
 env = Env()
 Env.read_env()
 ENVIRONMENT = env('ENVIRONMENT', default='production')
-# Definir una variable global
-base_printed = False
 
 # Configuraciones base de la aplicación
 SECRET_KEY = env('SECRET_KEY')
-if ENVIRONMENT == 'development':
-    DEBUG = True
-    ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
-else:
-    DEBUG = False
-    ALLOWED_HOSTS = ['*']
+DEBUG = ENVIRONMENT == 'development'
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS') if DEBUG else ['*']
 
 # Configuración de la base de datos
 if ENVIRONMENT == 'development':
@@ -29,38 +23,9 @@ if ENVIRONMENT == 'development':
             'PORT': env('DATABASE_PORT'),
         }
     }
-    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
-    
-    from datetime import datetime
-from termcolor import colored
-from prettytable import PrettyTable
-import django
-
-# Configurar colores
-color_azul = lambda text: colored(text, 'blue')
-color_verde = lambda text: colored(text, 'green')
-
-# Verificar si es la instancia principal del proceso
-if os.environ.get('RUN_MAIN') or os.environ.get('WERKZEUG_RUN_MAIN'):
-    if not base_printed:
-        # Usar PrettyTable para mostrar la información
-        table = PrettyTable()
-        table.field_names = ["Configuración", "Valor"]
-        table.add_row([color_azul('Entorno'), ENVIRONMENT])
-        table.add_row([color_azul('Versión de Django'), django.get_version()])
-        table.add_row([color_azul('Fecha y Hora de Inicio'), datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
-        
-        print(table)
-        print(color_verde('Configuración de la base de datos:'))
-        print(DATABASES['default'])
-        print('ALLOWED_HOSTS:', ALLOWED_HOSTS)
-        base_printed = True
-
-if ENVIRONMENT == 'production':
-    DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
-
-
-
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+else:
+    DATABASES = {
+        'default': dj_database_url.parse(env('DATABASE_URL'))
+    }
+# Rutas dentro del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent

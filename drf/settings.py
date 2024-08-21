@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from .base import *
+from .info import print_info
 import os
 ALLOWED_HOSTS
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -69,6 +70,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 MIDDLEWARE = [
+    #'corsheaders.middleware.CorsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -174,3 +176,7 @@ else:
 
 
 LOGTAIL_UPDATE_INTERVAL = 2000 # El valor predeterminado es 3000 (tres segundos)
+
+
+# Llamar a `print_info` después de todas las configuraciones
+print_info(ENVIRONMENT, DATABASES, ALLOWED_HOSTS)
